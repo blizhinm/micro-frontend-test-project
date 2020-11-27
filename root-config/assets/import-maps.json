@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "single-spa": "https://cdn.jsdelivr.net/npm/single-spa@5.5.5/lib/system/single-spa.min.js",
+    "localhost.rootconfig": "http://localhost:9000/localhost-root-config.js",
+    "localhost.firstapp": "http://localhost:8081/js/app.js",
+    "localhost.secondapp": "http://localhost:8082/js/app.js",
+    "mo.messenger": "http://localhost:8083/js/app.js"
+  }
+}
