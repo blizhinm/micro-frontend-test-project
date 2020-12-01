@@ -66,5 +66,16 @@ self.addEventListener('message', async (event) => {
       success: true,
       subscriptionId: data.public_id,
     });
+
+    self.addEventListener('push', (event) => {
+      console.log('%c%s', 'color: lime', 'SERVICE_WORKER got a push!', event);
+
+      client.postMessage({
+        type: 'push',
+        success: true,
+      });
+
+      self.registration.showNotification('Testing push!!!!!');
+    });
   }
 });

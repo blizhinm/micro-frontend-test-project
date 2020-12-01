@@ -55,8 +55,7 @@ export default {
       console.log('%c%s', 'color: lime', 'FIRSTAPP got a message from SERVICE_WORKER', event);
 
       if (event.data.type === 'subscribe') {
-        console.log(this.subscriptionId);
-        this.subscriptionId = event.data.subscriptionId;
+        localStorage.setItem('SWubscriptionId', event.data.subscriptionId);
       }
     },
 
@@ -94,7 +93,7 @@ export default {
           'Accept': 'application/json, text/plain, */*',
           'Content-Type': 'application/json'
         },
-        body: this.subscriptionId,
+        body: localStorage.getItem('SWubscriptionId'),
       });
     },
   },

@@ -53,15 +53,10 @@ def send_push():
         public_id=public_id
     ).first()
 
-    import pdb; pdb.set_trace()
-
     try:
         webpush(
-            subscription_info=subscription.subscription_json,
-            data={
-                'title': 'New Message!',
-                'content': 'Hello there!'
-            },
+            subscription_info=json.loads(subscription.subscription_json),
+            data='Testing them push-notifications!',
             vapid_private_key='zBn90IZnuEab-VoDHptwFjXArlRVZoOlfwC6e5I5QRI',
             vapid_claims={
                 'sub': 'mailto:maximblizhin.motmom@gmail.com',
