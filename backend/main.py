@@ -1,13 +1,14 @@
 
 import json, time, uuid
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from pywebpush import webpush, WebPushException
+from werkzeug.exceptions import NotFound
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./database.sql'
 db = SQLAlchemy(app)
 CORS(app)
 
@@ -48,32 +49,41 @@ def create_subscription():
 
 @app.route('/api/send-push', methods=['POST'])
 def send_push():
-    public_id = request.get_data().decode('utf-8')
-    subscription = PushSubscription.query.filter_by(
-        public_id=public_id
-    ).first()
+    subscriptions = PushSubscription.query.all()
 
-    try:
-        webpush(
-            subscription_info=json.loads(subscription.subscription_json),
-            data='Testing them push-notifications!',
-            vapid_private_key='zBn90IZnuEab-VoDHptwFjXArlRVZoOlfwC6e5I5QRI',
-            vapid_claims={
-                'sub': 'mailto:maximblizhin.motmom@gmail.com',
-                'exp': time.time() + 300 # 5 minutes
-            }
-        )
-    except WebPushException as ex:
-        print('Error: {}', repr(ex))
-        # Mozilla returns additional information in the body of the response.
-        if ex.response and ex.response.json():
-            extra = ex.response.json()
-            print(
-                'Remote service replied with a {}:{}, {}',
-                extra.code,
-                extra.errno,
-                extra.message
+    if not subscriptions:
+        raise NotFound('No subscriptions')
+
+    for subscription in subscriptions:
+        try:
+            webpush(
+                subscription_info=json.loads(subscription.subscription_json),
+                data=json.dumps({
+                    'message': {
+                        'id': uuid.uuid4().hex,
+                        'from_id': 17,
+                        'chat_id': 66,
+                        'text': 'Hey There!',
+                    },
+                    'unread_messages': 13
+                }),
+                vapid_private_key='zBn90IZnuEab-VoDHptwFjXArlRVZoOlfwC6e5I5QRI',
+                vapid_claims={
+                    'sub': 'mailto:maximblizhin.motmom@gmail.com',
+                    'exp': time.time() + 300 # 5 minutes
+                }
             )
+        except WebPushException as ex:
+            print('Error: {}', repr(ex))
+            # Mozilla returns additional information in the body of the response.
+            if ex.response and ex.response.json():
+                extra = ex.response.json()
+                print(
+                    'Remote service replied with a {}:{}, {}',
+                    extra.code,
+                    extra.errno,
+                    extra.message
+                )
 
     return jsonify({
         'status': 'success',
